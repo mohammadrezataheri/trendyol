@@ -1,6 +1,5 @@
 'use client';
 
-import { List } from '@refinedev/antd';
 import { Table, Space, Button, Tag, Avatar, Typography, Tabs, Card, Empty, Spin, Modal, App } from 'antd';
 import { EditOutlined, DeleteOutlined, SyncOutlined, InstagramOutlined, PlusOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { formatPersianNumber } from '../../utils/persian-number';
@@ -261,13 +260,13 @@ export default function InstagramAccountsPage() {
   };
 
   return (
-    <List>
+    <div style={{ padding: '24px' }}>
       <Card
         style={{
           borderRadius: '12px',
           overflow: 'hidden',
         }}
-        bodyStyle={{ padding: 0 }}
+        styles={{ body: { padding: 0 } }}
       >
         <Tabs
           defaultActiveKey="accounts"
@@ -493,7 +492,7 @@ export default function InstagramAccountsPage() {
           </div>
         </div>
       </Modal>
-    </List>
+    </div>
   );
 }
 

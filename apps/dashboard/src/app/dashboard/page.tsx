@@ -108,9 +108,7 @@ export default function DashboardPage() {
                 color: '#fff',
                 transition: 'all 0.3s ease',
               }}
-              bodyStyle={{
-                padding: '24px',
-              }}
+              styles={{ body: { padding: '24px' } }}
             >
               <PersianStatistic
                 title={
