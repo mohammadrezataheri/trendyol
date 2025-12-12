@@ -1,8 +1,8 @@
 'use client';
 
 import { List } from '@refinedev/antd';
-import { Table, Space, Button, Tag, Avatar, Typography, Tabs, Card, Empty, Spin, notification } from 'antd';
-import { EditOutlined, DeleteOutlined, SyncOutlined, InstagramOutlined, PlusOutlined } from '@ant-design/icons';
+import { Table, Space, Button, Tag, Avatar, Typography, Tabs, Card, Empty, Spin, Modal, App } from 'antd';
+import { EditOutlined, DeleteOutlined, SyncOutlined, InstagramOutlined, PlusOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { formatPersianNumber } from '../../utils/persian-number';
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
@@ -90,12 +90,15 @@ interface SyncResponse {
 }
 
 export default function InstagramAccountsPage() {
+  const { notification } = App.useApp();
   const [currentPage, setCurrentPage] = useState(1);
   const [accountsData, setAccountsData] = useState<InstagramAccount[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefetching, setIsRefetching] = useState(false);
   const [syncingAccountId, setSyncingAccountId] = useState<string | null>(null);
+  const [isAddAccountModalOpen, setIsAddAccountModalOpen] = useState(false);
+  const [isStartingLogin, setIsStartingLogin] = useState(false);
   
   const pageSize = 10;
 
@@ -200,8 +203,13 @@ export default function InstagramAccountsPage() {
     }
   };
 
-  const handleAddAccount = async () => {
+  const handleAddAccount = () => {
+    setIsAddAccountModalOpen(true);
+  };
+
+  const handleStartLogin = async () => {
     try {
+      setIsStartingLogin(true);
       const token = getAuthToken();
       
       const headers: Record<string, string> = {
@@ -222,12 +230,14 @@ export default function InstagramAccountsPage() {
       );
 
       if (response.data.redirect_url) {
-        // Open the redirect URL in a new window
+        setIsAddAccountModalOpen(false);
+        
+        // Redirect user to the login page in a new window
         window.open(response.data.redirect_url, '_blank', 'width=600,height=700');
         
-        notification.info({
+        notification.success({
           message: 'در حال اتصال',
-          description: 'پنجره جدید برای اتصال اکانت اینستاگرام باز شد. پس از تکمیل فرآیند، لیست را به‌روزرسانی کنید.',
+          description: 'پنجره جدید برای اتصال اکانت اینستاگرام باز شد. پس از تکمیل فرآیند، اکانت شما در لیست نمایش داده می‌شود.',
           placement: 'topRight',
           duration: 5,
         });
@@ -245,6 +255,8 @@ export default function InstagramAccountsPage() {
         placement: 'topRight',
         duration: 4,
       });
+    } finally {
+      setIsStartingLogin(false);
     }
   };
 
@@ -436,6 +448,51 @@ export default function InstagramAccountsPage() {
           ]}
         />
       </Card>
+      
+      <Modal
+        open={isAddAccountModalOpen}
+        onCancel={() => setIsAddAccountModalOpen(false)}
+        footer={null}
+        title={
+          <Space>
+            <InfoCircleOutlined style={{ color: '#1890ff' }} />
+            <span>راهنمای اتصال اکانت اینستاگرام</span>
+          </Space>
+        }
+        width={600}
+      >
+        <div style={{ padding: '8px 0' }}>
+          <Typography.Paragraph style={{ marginBottom: '16px', fontSize: '14px', lineHeight: '1.8' }}>
+            <Text strong>قبل از شروع:</Text>
+            <br />
+            لطفاً ابتدا در حساب اینستاگرامی که می‌خواهید متصل کنید، وارد شوید.
+          </Typography.Paragraph>
+          
+          <Typography.Paragraph style={{ marginBottom: '16px', fontSize: '14px', lineHeight: '1.8' }}>
+            <Text strong>مراحل اتصال:</Text>
+            <br />
+            1. پس از تایید، به صفحه‌ای هدایت می‌شوید که می‌توانید اکانت خود را متصل کنید.
+            <br />
+            2. پس از اتصال موفق، اکانت شما در لیست نمایش داده می‌شود.
+            <br />
+            3. برای به‌روزرسانی اطلاعات اکانت، روی دکمه "همگام‌سازی اکانت" کلیک کنید.
+          </Typography.Paragraph>
+          
+          <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+            <Button onClick={() => setIsAddAccountModalOpen(false)}>
+              انصراف
+            </Button>
+            <Button
+              type="primary"
+              icon={<InstagramOutlined />}
+              loading={isStartingLogin}
+              onClick={handleStartLogin}
+            >
+              می‌دانم و شروع می‌کنم
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </List>
   );
 }
