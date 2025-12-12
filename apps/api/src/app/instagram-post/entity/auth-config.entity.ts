@@ -1,5 +1,6 @@
 import EntityBase from 'src/shared/global/entityBase.entity';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import InstagramAccount from './instagram.entity';
 
 @Entity()
 export default class AuthConfig extends EntityBase {
@@ -29,4 +30,7 @@ export default class AuthConfig extends EntityBase {
 
   @Column({ type: 'varchar', nullable: true })
   createdBy: string; // user ID who created this config
+
+  @OneToMany(() => InstagramAccount, (account) => account.authConfig)
+  instagramAccounts: InstagramAccount[];
 }

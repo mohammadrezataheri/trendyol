@@ -35,10 +35,6 @@ export class InstagramPostService {
   }
 
   async accountList(userReq: IGetUser, SearchBaseDto: SearchBaseDto) {
-
-console.log("userReq", userReq);
-console.log("SearchBaseDto", SearchBaseDto);
-
     // بررسی می‌کنیم که آیا کاربر نقش ADMIN دارد یا نه
     const isAdmin = userReq?.email === process.env.ADMIN_EMAIL;
 
@@ -46,22 +42,55 @@ console.log("SearchBaseDto", SearchBaseDto);
       throw new NotAcceptableException("شما سطح دسترسی به این بخش را ندارید");
     }
 
+    const skip = SearchBaseDto.skip || 0;
+    const take = SearchBaseDto.take || 10;
 
-    
-    // دریافت لیست اکانت‌های اینستاگرام از دیتابیس
-    const accounts = await this.instagramAccountRepository.find({
-      order: {
-        createdAt: "DESC",
-      },
-    });
+    // دریافت لیست اکانت‌های اینستاگرام از دیتابیس با relation authConfig
+    // استفاده از query builder برای اطمینان از انتخاب صحیح فیلدها
+    const queryBuilder = this.instagramAccountRepository
+      .createQueryBuilder('account')
+      .leftJoinAndSelect('account.authConfig', 'authConfig')
+      .orderBy('account.id', 'DESC')
+      .skip(skip)
+      .take(take);
+
+    const [accounts, total] = await queryBuilder.getManyAndCount();
+
+    // تبدیل داده‌ها به فرمت مناسب برای نمایش
+    const formattedData = accounts.map((account) => ({
+      // اطلاعات InstagramAccount
+      id: account.id,
+      connectedAccountId: account.connectedAccountId,
+      username: account.username,
+      userId: account.userId,
+      createdAt: account.createdAt,
+      updatedAt: account.updatedAt,
+      // اطلاعات AuthConfig مرتبط
+      authConfig: account.authConfig
+        ? {
+            id: account.authConfig.id,
+            authConfigId: account.authConfig.authConfigId,
+            toolkit: account.authConfig.toolkit,
+            authScheme: account.authConfig.authScheme,
+            clientId: account.authConfig.clientId,
+            scopes: account.authConfig.scopes,
+            redirectUrl: account.authConfig.redirectUrl,
+            createdBy: account.authConfig.createdBy,
+            createdAt: account.authConfig.createdAt,
+            updatedAt: account.authConfig.updatedAt,
+          }
+        : null,
+    }));
 
     return {
-      data: accounts,
-      total: accounts.length,
+      data: formattedData,
+      total,
+      skip,
+      take,
     };
   }
 
-
+ 
   /**
    * Get list of auth configs
    */
@@ -205,10 +234,16 @@ console.log("SearchBaseDto", SearchBaseDto);
         });
 
         if (!existingInstagramAccount) {
+          // پیدا کردن authConfig (یا موجود یا تازه ایجاد شده)
+          const authConfigToUse = existingAuthConfig || await this.authConfigRepository.findOne({
+            where: { authConfigId: authConfigId },
+          });
+
           await this.instagramAccountRepository.save({
             connectedAccountId: connectedAccountId,
             username: null, // nullable
             userId: userReq.id,
+            authConfig: authConfigToUse, // تنظیم رابطه با authConfig
           });
         }
       }
