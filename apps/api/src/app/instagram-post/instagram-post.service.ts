@@ -7,7 +7,9 @@ import { InjectRepository } from "@nestjs/typeorm";
 import CreateAuthConfigDto from "./dto/create-auth-config.dto";
 import InitiateLoginDto from "./dto/initiate-login.dto";
 import SyncAccountDto from "./dto/sync-account.dto";
+import CreateManualCronDto from "./dto/create-manual-cron.dto";
 import AuthConfig from "./entity/auth-config.entity";
+import InstagramPostConfig from "./entity/instagram-post.entity";
 import { firstValueFrom } from "rxjs";
 import { RoleName } from "../auth/entity/role.entity";
 import { IGetUser } from "src/shared/decorators/get-user.decorator";
@@ -27,7 +29,9 @@ export class InstagramPostService {
     @InjectRepository(InstagramAccount)
     private readonly instagramAccountRepository: Repository<InstagramAccount>,
     @InjectRepository(AuthConfig)
-    private readonly authConfigRepository: Repository<AuthConfig>
+    private readonly authConfigRepository: Repository<AuthConfig>,
+    @InjectRepository(InstagramPostConfig)
+    private readonly instagramPostConfigRepository: Repository<InstagramPostConfig>
   ) {
     this.composioApiKey = this.configService.get<string>("COMPOSIO_API_KEY") || "";
     if (!this.composioApiKey) {
@@ -408,6 +412,43 @@ export class InstagramPostService {
         "خطا در همگام‌سازی اطلاعات اکانت اینستاگرام"
       );
     }
+  }
+
+  async createManualCron(userReq: IGetUser, createManualCronDto: CreateManualCronDto) {
+    // بررسی دسترسی ادمین
+    const isAdmin = userReq?.email === process.env.ADMIN_EMAIL;
+    if (!isAdmin) {
+      throw new NotAcceptableException("فقط ادمین می‌تواند کرون جاب ایجاد کند");
+    }
+
+    // بررسی وجود اکانت اینستاگرام
+    const account = await this.instagramAccountRepository.findOne({
+      where: { id: createManualCronDto.accountId },
+    });
+
+    if (!account) {
+      throw new NotFoundException(`اکانت اینستاگرام با شناسه ${createManualCronDto.accountId} یافت نشد`);
+    }
+
+    // ایجاد کرون جاب جدید
+    const cronJob = this.instagramPostConfigRepository.create({
+      title: createManualCronDto.title,
+      account: createManualCronDto.accountId,
+      userId: userReq.id,
+      cronTime: createManualCronDto.cronTime,
+      postType: createManualCronDto.postType,
+      mainPrompt: createManualCronDto.mainPrompt || null,
+      captionPrompt: createManualCronDto.captionPrompt || null,
+      imageGenerationImage: createManualCronDto.imageGenerationImage || null,
+    });
+
+    const savedCronJob = await this.instagramPostConfigRepository.save(cronJob);
+
+    return {
+      success: true,
+      message: "کرون جاب با موفقیت ایجاد شد",
+      data: savedCronJob,
+    };
   }
 
 }

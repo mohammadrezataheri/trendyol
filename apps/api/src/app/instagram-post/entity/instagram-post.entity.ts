@@ -8,6 +8,11 @@ import {
 import InstagramAccount from './instagram.entity';
 import EntityBase from 'src/shared/global/entityBase.entity';
 
+export enum PostType {
+  MANUAL = 'manual',
+  SAZITO = 'sazito',
+}
+
 @Entity()
 // @Unique("InstagramPost_unique", ["account"])
 export default class InstagramPostConfig extends EntityBase {
@@ -25,6 +30,13 @@ export default class InstagramPostConfig extends EntityBase {
 
   @Column({ type: 'varchar' })
   cronTime: string;
+
+  @Column({
+    type: 'enum',
+    enum: PostType,
+    default: PostType.MANUAL,
+  })
+  postType: PostType;
 
   @Column('text', { nullable: true })
   mainPrompt: string;

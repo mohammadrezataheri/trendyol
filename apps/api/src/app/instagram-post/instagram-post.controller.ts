@@ -3,6 +3,7 @@ import { Get, Post, Query, Body, Controller, UseGuards } from '@nestjs/common';
 import CreateAuthConfigDto from './dto/create-auth-config.dto';
 import InitiateLoginDto from './dto/initiate-login.dto';
 import SyncAccountDto from './dto/sync-account.dto';
+import CreateManualCronDto from './dto/create-manual-cron.dto';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ApiController } from 'src/shared/decorators/api-controller.decorator';
@@ -46,6 +47,19 @@ export class AdminInstagramPostController {
     @Body() syncAccountDto: SyncAccountDto
   ) {
     return this.InstagramPostService.syncAccount(user, syncAccountDto);
+  }
+
+  @RequireRoles(RoleName.ADMIN)
+  @ApiOperation({
+    summary: 'ایجاد کرون جاب دستی',
+    description: 'این endpoint یک کرون جاب جدید برای پست دستی ایجاد می‌کند',
+  })
+  @Post('cron/manual')
+  createManualCron(
+    @GetUser() user: IGetUser,
+    @Body() createManualCronDto: CreateManualCronDto
+  ) {
+    return this.InstagramPostService.createManualCron(user, createManualCronDto);
   }
 
 }

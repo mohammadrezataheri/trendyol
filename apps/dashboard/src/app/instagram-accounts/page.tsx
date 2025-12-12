@@ -1,6 +1,6 @@
 'use client';
 
-import { Table, Space, Button, Tag, Avatar, Typography, Tabs, Card, Empty, Spin, Modal, App } from 'antd';
+import { Table, Space, Button, Tag, Avatar, Typography, Tabs, Card, Empty, Spin, Modal, App, Form, Input, Select } from 'antd';
 import { EditOutlined, DeleteOutlined, SyncOutlined, InstagramOutlined, PlusOutlined, InfoCircleOutlined, FileTextOutlined, ShoppingOutlined } from '@ant-design/icons';
 import { formatPersianNumber } from '../../utils/persian-number';
 import { useState, useEffect, useCallback } from 'react';
@@ -10,6 +10,53 @@ import axios from 'axios';
 const { Text } = Typography;
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api/v1';
+
+// لیست زمان‌های اجرای کرون با ترجمه فارسی
+const cronTimeOptions = [
+  { value: '* * * * *', label: 'هر 1 دقیقه' },
+  { value: '*/5 * * * *', label: 'هر 5 دقیقه' },
+  { value: '*/10 * * * *', label: 'هر 10 دقیقه' },
+  { value: '*/15 * * * *', label: 'هر 15 دقیقه' },
+  { value: '*/30 * * * *', label: 'هر 30 دقیقه' },
+  { value: '0 * * * *', label: 'هر ساعت' },
+  { value: '0 */2 * * *', label: 'هر 2 ساعت' },
+  { value: '0 */3 * * *', label: 'هر 3 ساعت' },
+  { value: '0 */6 * * *', label: 'هر 6 ساعت' },
+  { value: '0 */12 * * *', label: 'هر 12 ساعت' },
+  { value: '0 0 * * *', label: 'هر روز ساعت 00:00 (نیمه شب)' },
+  { value: '0 1 * * *', label: 'هر روز ساعت 01:00' },
+  { value: '0 2 * * *', label: 'هر روز ساعت 02:00' },
+  { value: '0 3 * * *', label: 'هر روز ساعت 03:00' },
+  { value: '0 4 * * *', label: 'هر روز ساعت 04:00' },
+  { value: '0 5 * * *', label: 'هر روز ساعت 05:00' },
+  { value: '0 6 * * *', label: 'هر روز ساعت 06:00' },
+  { value: '0 7 * * *', label: 'هر روز ساعت 07:00' },
+  { value: '0 8 * * *', label: 'هر روز ساعت 08:00' },
+  { value: '0 9 * * *', label: 'هر روز ساعت 09:00' },
+  { value: '0 10 * * *', label: 'هر روز ساعت 10:00' },
+  { value: '0 11 * * *', label: 'هر روز ساعت 11:00' },
+  { value: '0 12 * * *', label: 'هر روز ساعت 12:00' },
+  { value: '0 13 * * *', label: 'هر روز ساعت 13:00' },
+  { value: '0 14 * * *', label: 'هر روز ساعت 14:00' },
+  { value: '0 15 * * *', label: 'هر روز ساعت 15:00' },
+  { value: '0 16 * * *', label: 'هر روز ساعت 16:00' },
+  { value: '0 17 * * *', label: 'هر روز ساعت 17:00' },
+  { value: '0 18 * * *', label: 'هر روز ساعت 18:00' },
+  { value: '0 19 * * *', label: 'هر روز ساعت 19:00' },
+  { value: '0 20 * * *', label: 'هر روز ساعت 20:00' },
+  { value: '0 21 * * *', label: 'هر روز ساعت 21:00' },
+  { value: '0 22 * * *', label: 'هر روز ساعت 22:00' },
+  { value: '0 23 * * *', label: 'هر روز ساعت 23:00' },
+  { value: '0 0 * * 0', label: 'هر یکشنبه ساعت 00:00' },
+  { value: '0 0 * * 1', label: 'هر دوشنبه ساعت 00:00' },
+  { value: '0 0 * * 2', label: 'هر سه‌شنبه ساعت 00:00' },
+  { value: '0 0 * * 3', label: 'هر چهارشنبه ساعت 00:00' },
+  { value: '0 0 * * 4', label: 'هر پنج‌شنبه ساعت 00:00' },
+  { value: '0 0 * * 5', label: 'هر جمعه ساعت 00:00' },
+  { value: '0 0 * * 6', label: 'هر شنبه ساعت 00:00' },
+  { value: '0 0 1 * *', label: 'اول هر ماه ساعت 00:00' },
+  { value: '0 0 1 1 *', label: 'اول ژانویه هر سال ساعت 00:00' },
+];
 
 // Create axios instance with credentials and Bearer token support
 const axiosInstance = axios.create({
@@ -102,6 +149,9 @@ export default function InstagramAccountsPage() {
   const [isAddAccountModalOpen, setIsAddAccountModalOpen] = useState(false);
   const [isStartingLogin, setIsStartingLogin] = useState(false);
   const [isAddCronModalOpen, setIsAddCronModalOpen] = useState(false);
+  const [isManualPostModalOpen, setIsManualPostModalOpen] = useState(false);
+  const [form] = Form.useForm();
+  const [isSubmittingManualPost, setIsSubmittingManualPost] = useState(false);
   
   // Get active tab from URL query parameter, default to 'accounts'
   const activeTab = searchParams.get('tab') || 'accounts';
@@ -219,13 +269,61 @@ export default function InstagramAccountsPage() {
 
   const handleManualPost = () => {
     setIsAddCronModalOpen(false);
-    // TODO: Implement manual post functionality
-    notification.info({
-      message: 'در حال توسعه',
-      description: 'قابلیت افزودن پست دستی به زودی اضافه خواهد شد',
-      placement: 'topRight',
-      duration: 3,
-    });
+    setIsManualPostModalOpen(true);
+  };
+
+  const handleSubmitManualPost = async (values: any) => {
+    try {
+      setIsSubmittingManualPost(true);
+      const token = getAuthToken();
+      
+      const headers: Record<string, string> = {
+        'accept': '*/*',
+        'Content-Type': 'application/json',
+      };
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await axiosInstance.post(
+        '/instagram-post/cron/manual',
+        {
+          title: values.title,
+          accountId: values.accountId,
+          cronTime: values.cronTime,
+          postType: 'manual',
+          mainPrompt: values.mainPrompt || undefined,
+          captionPrompt: values.captionPrompt || undefined,
+          imageGenerationImage: values.imageGenerationImage || undefined,
+        },
+        {
+          headers,
+        }
+      );
+
+      if (response.data.success) {
+        notification.success({
+          message: 'موفقیت',
+          description: response.data.message || 'کرون جاب با موفقیت ایجاد شد',
+          placement: 'topRight',
+          duration: 3,
+        });
+        
+        setIsManualPostModalOpen(false);
+        form.resetFields();
+      }
+    } catch (error: any) {
+      console.error('Error creating manual cron:', error);
+      notification.error({
+        message: 'خطا',
+        description: error.response?.data?.message || 'خطا در ایجاد کرون جاب',
+        placement: 'topRight',
+        duration: 4,
+      });
+    } finally {
+      setIsSubmittingManualPost(false);
+    }
   };
 
   const handleSazitoProduct = () => {
@@ -602,6 +700,108 @@ export default function InstagramAccountsPage() {
             </Button>
           </div>
         </div>
+      </Modal>
+      
+      <Modal
+        open={isManualPostModalOpen}
+        onCancel={() => {
+          setIsManualPostModalOpen(false);
+          form.resetFields();
+        }}
+        footer={null}
+        title={
+          <Space>
+            <FileTextOutlined style={{ color: '#1890ff' }} />
+            <span>افزودن پست دستی</span>
+          </Space>
+        }
+        width={700}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleSubmitManualPost}
+          style={{ marginTop: '24px' }}
+        >
+          <Form.Item
+            name="title"
+            label="عنوان"
+            rules={[{ required: true, message: 'لطفاً عنوان را وارد کنید' }]}
+          >
+            <Input placeholder="عنوان کرون جاب" size="large" />
+          </Form.Item>
+
+          <Form.Item
+            name="accountId"
+            label="اکانت اینستاگرام"
+            rules={[{ required: true, message: 'لطفاً اکانت اینستاگرام را انتخاب کنید' }]}
+          >
+            <Select
+              placeholder="انتخاب اکانت اینستاگرام"
+              size="large"
+              showSearch
+              filterOption={(input, option) =>
+                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+              }
+              options={accountsData.map((account) => ({
+                value: account.id,
+                label: account.username || `اکانت ${account.id}`,
+              }))}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="cronTime"
+            label="زمان اجرای کرون"
+            rules={[{ required: true, message: 'لطفاً زمان اجرای کرون را انتخاب کنید' }]}
+          >
+            <Select
+              placeholder="انتخاب زمان اجرای کرون"
+              size="large"
+              showSearch
+              filterOption={(input, option) =>
+                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+              }
+              options={cronTimeOptions}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="mainPrompt"
+            label="پرمپت اصلی"
+          >
+            <Input.TextArea
+              rows={4}
+              placeholder="پرمپت اصلی برای تولید محتوا"
+              showCount
+              maxLength={1000}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="captionPrompt"
+            label="پرمپت کپشن"
+          >
+            <Input.TextArea
+              rows={4}
+              placeholder="پرمپت برای تولید کپشن پست"
+              showCount
+              maxLength={1000}
+            />
+          </Form.Item>
+
+          <Form.Item style={{ marginBottom: 0, marginTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+            <Button onClick={() => {
+              setIsManualPostModalOpen(false);
+              form.resetFields();
+            }}>
+              انصراف
+            </Button>
+            <Button type="primary" htmlType="submit" loading={isSubmittingManualPost}>
+              ایجاد کرون جاب
+            </Button>
+          </Form.Item>
+        </Form>
       </Modal>
     </div>
   );
