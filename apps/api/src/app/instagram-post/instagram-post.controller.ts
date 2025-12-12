@@ -1,6 +1,7 @@
 import { InstagramPostService } from './instagram-post.service';
 import { Get, Post, Query, Body, Controller, UseGuards } from '@nestjs/common';
 import CreateAuthConfigDto from './dto/create-auth-config.dto';
+import InitiateLoginDto from './dto/initiate-login.dto';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ApiController } from 'src/shared/decorators/api-controller.decorator';
@@ -22,17 +23,15 @@ export class AdminInstagramPostController {
 
   @RequireRoles(RoleName.ADMIN)
   @ApiOperation({
-    summary: 'ایجاد پیکربندی احراز هویت Composio برای اینستاگرام',
+    summary: 'شروع فرآیند لاگین اینستاگرام از طریق Composio',
+    description: 'این endpoint یک URL برای لاگین اینستاگرام برمی‌گرداند که کاربر باید به آن مراجعه کند',
   })
-  @Post('auth-config/create')
-  createAuthConfig(
+  @Post('auth/login')
+  initiateLogin(
     @GetUser() user: IGetUser,
-    @Body() createAuthConfigDto: CreateAuthConfigDto
+    @Body() initiateLoginDto: InitiateLoginDto
   ) {
-    return this.InstagramPostService.createAuthConfig(
-      user,
-      createAuthConfigDto
-    );
+    return this.InstagramPostService.initiateLogin(user, initiateLoginDto);
   }
 
   @RequireRoles(RoleName.ADMIN)
@@ -42,3 +41,4 @@ export class AdminInstagramPostController {
     return this.InstagramPostService.getAuthConfigs(user, SearchBaseDto);
   }
 }
+ 

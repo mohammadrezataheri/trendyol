@@ -1,10 +1,11 @@
-import { Injectable, NotAcceptableException, BadRequestException } from "@nestjs/common";
+import { Injectable, NotAcceptableException, BadRequestException, NotFoundException } from "@nestjs/common";
 import { HttpService } from "@nestjs/axios";
 import { ConfigService } from "@nestjs/config";
 import { Repository } from "typeorm";
 import InstagramAccount from "./entity/instagram.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import CreateAuthConfigDto from "./dto/create-auth-config.dto";
+import InitiateLoginDto from "./dto/initiate-login.dto";
 import AuthConfig from "./entity/auth-config.entity";
 import { firstValueFrom } from "rxjs";
 import { RoleName } from "../auth/entity/role.entity";
@@ -45,6 +46,8 @@ console.log("SearchBaseDto", SearchBaseDto);
       throw new NotAcceptableException("شما سطح دسترسی به این بخش را ندارید");
     }
 
+
+    
     // دریافت لیست اکانت‌های اینستاگرام از دیتابیس
     const accounts = await this.instagramAccountRepository.find({
       order: {
@@ -58,107 +61,13 @@ console.log("SearchBaseDto", SearchBaseDto);
     };
   }
 
-  /**
-   * Create auth config in Composio for Instagram toolkit
-   */
-  async createAuthConfig(
-    userReq: IGetUser,
-    createAuthConfigDto: CreateAuthConfigDto
-  ) {
-    // بررسی می‌کنیم که آیا کاربر نقش ADMIN دارد یا نه
-    const isAdmin = userReq?.roles?.some(
-      (role) => role.name === RoleName.ADMIN
-    );
-
-    if (!isAdmin) {
-      throw new NotAcceptableException("شما سطح دسترسی به این بخش را ندارید");
-    }
-
-    const userId = userReq.id;
-
-    const { clientId, clientSecret, scopes, redirectUrl } = createAuthConfigDto;
-
-    // Default scopes for Instagram
-    const defaultScopes = [
-      "instagram_basic",
-      "instagram_content_publish",
-      "pages_show_list",
-      "pages_read_engagement",
-    ];
-
-    const finalScopes = scopes && scopes.length > 0 ? scopes : defaultScopes;
-    const finalRedirectUrl = redirectUrl || "https://backend.composio.dev/api/v3/toolkits/auth/callback";
-
-    try {
-      // Create auth config via Composio API
-      const response = await firstValueFrom(
-        this.httpService.post(
-          `${this.composioBaseUrl}/auth-configs`,
-          {
-            toolkit: "instagram",
-            authScheme: "oauth2",
-            credentials: {
-              clientId: clientId,
-              clientSecret: clientSecret,
-            },
-            scopes: finalScopes,
-            redirectUrl: finalRedirectUrl,
-          },
-          {
-            headers: {
-              "X-API-Key": this.composioApiKey,
-              "Content-Type": "application/json",
-            },
-          }
-        )
-      );
-
-      const authConfigId = response.data?.id || response.data?.authConfigId;
-
-      if (!authConfigId) {
-        throw new BadRequestException("پاسخ نامعتبر از Composio API");
-      }
-
-      // Save auth config to database
-      const authConfig = await this.authConfigRepository.save({
-        authConfigId: authConfigId,
-        toolkit: "instagram",
-        authScheme: "oauth2",
-        clientId: clientId,
-        clientSecret: clientSecret,
-        scopes: finalScopes,
-        redirectUrl: finalRedirectUrl,
-        createdBy: userId,
-      });
-
-      return {
-        success: true,
-        message: "پیکربندی احراز هویت با موفقیت ایجاد شد",
-        data: {
-          authConfigId: authConfig.authConfigId,
-          id: authConfig.id,
-          toolkit: authConfig.toolkit,
-          scopes: authConfig.scopes,
-        },
-      };
-    } catch (error) {
-      console.error("Error creating auth config:", error?.response?.data || error?.message);
-      throw new BadRequestException(
-        error?.response?.data?.message || 
-        error?.message || 
-        "خطا در ایجاد پیکربندی احراز هویت"
-      );
-    }
-  }
 
   /**
    * Get list of auth configs
    */
     async getAuthConfigs(userReq: IGetUser, searchBaseDto: SearchBaseDto) {
     // بررسی می‌کنیم که آیا کاربر نقش ADMIN دارد یا نه
-    const isAdmin = userReq?.roles?.some(
-      (role) => role.name === RoleName.ADMIN
-    );
+    const isAdmin = userReq?.email === process.env.ADMIN_EMAIL;
 
     if (!isAdmin) {
       throw new NotAcceptableException("شما سطح دسترسی به این بخش را ندارید");
@@ -191,5 +100,77 @@ console.log("SearchBaseDto", SearchBaseDto);
     };
   }
 
+  /**
+   * Initiate Instagram login flow via Composio
+   * این متد یک URL برای لاگین اینستاگرام برمی‌گرداند
+   */
+  async initiateLogin(userReq: IGetUser, initiateLoginDto: InitiateLoginDto) {
+    // بررسی می‌کنیم که آیا کاربر نقش ADMIN دارد یا نه
+    const isAdmin = userReq?.email === process.env.ADMIN_EMAIL;
+
+    if (!isAdmin) {
+      throw new NotAcceptableException("شما سطح دسترسی به این بخش را ندارید");
+    }
+
+    try {
+      // درخواست اول: ایجاد auth config در Composio
+      const authConfigResponse = await firstValueFrom(
+        this.httpService.post(
+          `${this.composioBaseUrl}/auth_configs`,
+          {
+            toolkit: {
+              slug: "instagram"
+            }
+          },
+          {
+            headers: {
+              "x-api-key": this.composioApiKey,
+              "Content-Type": "application/json",
+            },
+          }
+        )
+      );
+
+      const authConfigId = authConfigResponse.data?.auth_config?.id;
+
+      if (!authConfigId) {
+        throw new BadRequestException("پاسخ نامعتبر از Composio API - auth_config.id یافت نشد");
+      }
+
+      // درخواست دوم: ایجاد connected account link
+      const linkResponse = await firstValueFrom(
+        this.httpService.post(
+          `${this.composioBaseUrl}/connected_accounts/link`,
+          {
+            auth_config_id: authConfigId,
+            user_id: userReq.id
+          },
+          {
+            headers: {
+              "x-api-key": this.composioApiKey,
+              "Content-Type": "application/json",
+            },
+          }
+        )
+      );
+
+      const redirectUrl = linkResponse.data?.redirect_url;
+
+      if (!redirectUrl) {
+        throw new BadRequestException("پاسخ نامعتبر از Composio API - redirect_url یافت نشد");
+      }
+
+      return {
+        redirect_url: redirectUrl
+      };
+    } catch (error) {
+      console.error("Error initiating login:", error?.response?.data || error?.message);
+      throw new BadRequestException(
+        error?.response?.data?.message || 
+        error?.message || 
+        "خطا در ایجاد لینک لاگین اینستاگرام"
+      );
+    }
+  }
 
 }
