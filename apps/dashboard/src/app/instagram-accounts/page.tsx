@@ -11,7 +11,7 @@ const { Text } = Typography;
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api/v1';
 
-// لیست زمان‌های اجرای کرون با ترجمه فارسی
+// لیست زمان‌های اجرای کران با ترجمه فارسی
 const cronTimeOptions = [
   { value: '* * * * *', label: 'هر 1 دقیقه' },
   { value: '*/5 * * * *', label: 'هر 5 دقیقه' },
@@ -305,7 +305,7 @@ export default function InstagramAccountsPage() {
       if (response.data.success) {
         notification.success({
           message: 'موفقیت',
-          description: response.data.message || 'کرون جاب با موفقیت ایجاد شد',
+          description: response.data.message || 'کران جاب با موفقیت ایجاد شد',
           placement: 'topRight',
           duration: 3,
         });
@@ -317,7 +317,7 @@ export default function InstagramAccountsPage() {
       console.error('Error creating manual cron:', error);
       notification.error({
         message: 'خطا',
-        description: error.response?.data?.message || 'خطا در ایجاد کرون جاب',
+        description: error.response?.data?.message || 'خطا در ایجاد کران جاب',
         placement: 'topRight',
         duration: 4,
       });
@@ -558,7 +558,7 @@ export default function InstagramAccountsPage() {
             },
             {
               key: 'cronjobs',
-              label: 'کرون جاب‌ها',
+              label: 'کران جاب‌ها',
               children: (
                 <div style={{ padding: '24px 0' }}>
                   <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'flex-end' }}>
@@ -568,11 +568,11 @@ export default function InstagramAccountsPage() {
                       size="large"
                       onClick={handleAddCron}
                     >
-                      افزودن کرون جدید
+                      افزودن کران جدید
                     </Button>
                   </div>
                   <Empty
-                    description="هنوز کرون جابی تعریف نشده است"
+                    description="هنوز کران جابی تعریف نشده است"
                     image={Empty.PRESENTED_IMAGE_SIMPLE}
                   />
                 </div>
@@ -623,15 +623,26 @@ export default function InstagramAccountsPage() {
             3. برای به‌روزرسانی اطلاعات اکانت، روی دکمه "همگام‌سازی اکانت" کلیک کنید.
           </Typography.Paragraph>
           
-          <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-            <Button onClick={() => setIsAddAccountModalOpen(false)}>
-              انصراف
-            </Button>
+          <div style={{ 
+            marginTop: '32px', 
+            display: 'flex', 
+            justifyContent: 'center',
+            paddingTop: '16px',
+            borderTop: '1px solid #f0f0f0'
+          }}>
             <Button
               type="primary"
               icon={<InstagramOutlined />}
               loading={isStartingLogin}
               onClick={handleStartLogin}
+              size="large"
+              style={{
+                minWidth: '180px',
+                height: '44px',
+                borderRadius: '8px',
+                fontWeight: 500,
+                boxShadow: '0 2px 8px rgba(24, 144, 255, 0.2)',
+              }}
             >
               می‌دانم و شروع می‌کنم
             </Button>
@@ -646,14 +657,14 @@ export default function InstagramAccountsPage() {
         title={
           <Space>
             <PlusOutlined style={{ color: '#1890ff' }} />
-            <span>افزودن کرون جدید</span>
+            <span>افزودن کران جدید</span>
           </Space>
         }
         width={500}
       >
         <div style={{ padding: '8px 0' }}>
           <Typography.Paragraph style={{ marginBottom: '24px', fontSize: '14px', lineHeight: '1.8', textAlign: 'center' }}>
-            <Text>لطفاً نوع کرون جاب مورد نظر خود را انتخاب کنید:</Text>
+            <Text>لطفاً نوع کران جاب مورد نظر خود را انتخاب کنید:</Text>
           </Typography.Paragraph>
           
           <Space direction="vertical" size="large" style={{ width: '100%' }}>
@@ -694,11 +705,6 @@ export default function InstagramAccountsPage() {
             </Button>
           </Space>
           
-          <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end' }}>
-            <Button onClick={() => setIsAddCronModalOpen(false)}>
-              انصراف
-            </Button>
-          </div>
         </div>
       </Modal>
       
@@ -728,7 +734,7 @@ export default function InstagramAccountsPage() {
             label="عنوان"
             rules={[{ required: true, message: 'لطفاً عنوان را وارد کنید' }]}
           >
-            <Input placeholder="عنوان کرون جاب" size="large" />
+            <Input placeholder="عنوان کران جاب" size="large" />
           </Form.Item>
 
           <Form.Item
@@ -752,11 +758,11 @@ export default function InstagramAccountsPage() {
 
           <Form.Item
             name="cronTime"
-            label="زمان اجرای کرون"
-            rules={[{ required: true, message: 'لطفاً زمان اجرای کرون را انتخاب کنید' }]}
+            label="زمان اجرای کران"
+            rules={[{ required: true, message: 'لطفاً زمان اجرای کران را انتخاب کنید' }]}
           >
             <Select
-              placeholder="انتخاب زمان اجرای کرون"
+              placeholder="انتخاب زمان اجرای کران"
               size="large"
               showSearch
               filterOption={(input, option) =>
@@ -768,11 +774,11 @@ export default function InstagramAccountsPage() {
 
           <Form.Item
             name="mainPrompt"
-            label="پرمپت اصلی"
+            label="پرامپت اصلی"
           >
             <Input.TextArea
               rows={4}
-              placeholder="پرمپت اصلی برای تولید محتوا"
+              placeholder="پرامپت اصلی برای تولید محتوا"
               showCount
               maxLength={1000}
             />
@@ -780,25 +786,38 @@ export default function InstagramAccountsPage() {
 
           <Form.Item
             name="captionPrompt"
-            label="پرمپت کپشن"
+            label="پرامپت کپشن"
           >
             <Input.TextArea
               rows={4}
-              placeholder="پرمپت برای تولید کپشن پست"
+              placeholder="پرامپت برای تولید کپشن پست"
               showCount
               maxLength={1000}
             />
           </Form.Item>
 
-          <Form.Item style={{ marginBottom: 0, marginTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-            <Button onClick={() => {
-              setIsManualPostModalOpen(false);
-              form.resetFields();
-            }}>
-              انصراف
-            </Button>
-            <Button type="primary" htmlType="submit" loading={isSubmittingManualPost}>
-              ایجاد کرون جاب
+          <Form.Item style={{ 
+            marginBottom: 0, 
+            marginTop: '32px', 
+            display: 'flex', 
+            justifyContent: 'center',
+            paddingTop: '16px',
+            borderTop: '1px solid #f0f0f0'
+          }}>
+            <Button 
+              type="primary" 
+              htmlType="submit" 
+              loading={isSubmittingManualPost}
+              size="large"
+              style={{
+                minWidth: '150px',
+                height: '44px',
+                borderRadius: '8px',
+                fontWeight: 500,
+                boxShadow: '0 2px 8px rgba(24, 144, 255, 0.2)',
+              }}
+            >
+              ایجاد کران جاب
             </Button>
           </Form.Item>
         </Form>
