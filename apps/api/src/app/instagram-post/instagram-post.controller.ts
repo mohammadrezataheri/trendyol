@@ -6,6 +6,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ApiController } from 'src/shared/decorators/api-controller.decorator';
 import { RoleName } from '../auth/entity/role.entity';
 import { RequireRoles } from 'src/shared/decorators/require-roles.decorator';
+import { GetUser, IGetUser } from 'src/shared/decorators/get-user.decorator';
+import SearchBaseDto from 'src/shared/global/dto/searchBase.dto';
 
 @ApiController('instagram-post')
 export class AdminInstagramPostController {
@@ -14,9 +16,8 @@ export class AdminInstagramPostController {
   @RequireRoles(RoleName.ADMIN)
   @ApiOperation({ summary: 'لیست اکانت های اینستاگرام' })
   @Get('account/list')
-  accountList() // @Query() SearchBaseDto: SearchBaseDto // @GetUser() userReq: userRequest,
-  {
-    return this.InstagramPostService.accountList(null, null);
+  accountList(@GetUser() user: IGetUser,@Query() SearchBaseDto: SearchBaseDto) {
+    return this.InstagramPostService.accountList(user, SearchBaseDto);
   }
 
   @RequireRoles(RoleName.ADMIN)
@@ -25,11 +26,11 @@ export class AdminInstagramPostController {
   })
   @Post('auth-config/create')
   createAuthConfig(
-    // @GetUser() userReq: userRequest,
+    @GetUser() user: IGetUser,
     @Body() createAuthConfigDto: CreateAuthConfigDto
   ) {
     return this.InstagramPostService.createAuthConfig(
-      null,
+      user,
       createAuthConfigDto
     );
   }
@@ -37,8 +38,7 @@ export class AdminInstagramPostController {
   @RequireRoles(RoleName.ADMIN)
   @ApiOperation({ summary: 'لیست پیکربندی‌های احراز هویت' })
   @Get('auth-config/list')
-  getAuthConfigs() // @Query() searchBaseDto: SearchBaseDto // @GetUser() userReq: userRequest,
-  {
-    return this.InstagramPostService.getAuthConfigs(null, null);
+  getAuthConfigs(@GetUser() user: IGetUser,SearchBaseDto: SearchBaseDto) {
+    return this.InstagramPostService.getAuthConfigs(user, SearchBaseDto);
   }
 }

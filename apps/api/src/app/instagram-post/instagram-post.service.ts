@@ -7,6 +7,9 @@ import { InjectRepository } from "@nestjs/typeorm";
 import CreateAuthConfigDto from "./dto/create-auth-config.dto";
 import AuthConfig from "./entity/auth-config.entity";
 import { firstValueFrom } from "rxjs";
+import { RoleName } from "../auth/entity/role.entity";
+import { IGetUser } from "src/shared/decorators/get-user.decorator";
+import SearchBaseDto from "src/shared/global/dto/searchBase.dto";
 
 
 
@@ -30,30 +33,48 @@ export class InstagramPostService {
     }
   }
 
-  async accountList(userReq: any, SearchBaseDto: any) {
+  async accountList(userReq: IGetUser, SearchBaseDto: SearchBaseDto) {
 
-    const { isSuperAdmin } = userReq;
+console.log("userReq", userReq);
+console.log("SearchBaseDto", SearchBaseDto);
 
-    if (!isSuperAdmin) {
-        throw new NotAcceptableException("شما سطح دسترسی به این بخش را ندارید");
+    // بررسی می‌کنیم که آیا کاربر نقش ADMIN دارد یا نه
+    const isAdmin = userReq?.email === process.env.ADMIN_EMAIL;
+
+    if (!isAdmin) {
+      throw new NotAcceptableException("شما سطح دسترسی به این بخش را ندارید");
     }
 
+    // دریافت لیست اکانت‌های اینستاگرام از دیتابیس
+    const accounts = await this.instagramAccountRepository.find({
+      order: {
+        createdAt: "DESC",
+      },
+    });
 
-
+    return {
+      data: accounts,
+      total: accounts.length,
+    };
   }
 
   /**
    * Create auth config in Composio for Instagram toolkit
    */
   async createAuthConfig(
-    userReq: any,
+    userReq: IGetUser,
     createAuthConfigDto: CreateAuthConfigDto
   ) {
-    const { isSuperAdmin, id: userId } = userReq;
+    // بررسی می‌کنیم که آیا کاربر نقش ADMIN دارد یا نه
+    const isAdmin = userReq?.roles?.some(
+      (role) => role.name === RoleName.ADMIN
+    );
 
-    if (!isSuperAdmin) {
+    if (!isAdmin) {
       throw new NotAcceptableException("شما سطح دسترسی به این بخش را ندارید");
     }
+
+    const userId = userReq.id;
 
     const { clientId, clientSecret, scopes, redirectUrl } = createAuthConfigDto;
 
@@ -133,10 +154,13 @@ export class InstagramPostService {
   /**
    * Get list of auth configs
    */
-    async getAuthConfigs(userReq: any, searchBaseDto: any) {
-    const { isSuperAdmin } = userReq;
+    async getAuthConfigs(userReq: IGetUser, searchBaseDto: SearchBaseDto) {
+    // بررسی می‌کنیم که آیا کاربر نقش ADMIN دارد یا نه
+    const isAdmin = userReq?.roles?.some(
+      (role) => role.name === RoleName.ADMIN
+    );
 
-    if (!isSuperAdmin) {
+    if (!isAdmin) {
       throw new NotAcceptableException("شما سطح دسترسی به این بخش را ندارید");
     }
 

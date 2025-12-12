@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { typeOrmConfig } from 'src/config';
 import { SharedModule } from 'src/shared/shared.module';
+import { InstagramPostModule } from './instagram-post/instagram-post.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { SharedModule } from 'src/shared/shared.module';
     SharedModule,
     AuthModule,
     UsersModule,
+    InstagramPostModule
   ],
   controllers: [AppController],
   providers: [AppService],

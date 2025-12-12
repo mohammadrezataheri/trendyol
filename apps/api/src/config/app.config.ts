@@ -131,7 +131,7 @@ export const config = () => ({
   bodyParser: bodyParserConfig(),
   versioning: versioningConfig(),
   validationPipe: validationPipeConfig(),
-  globalPrefix: process.env.GLOBAL_PREFIX || 'api/v1',
+  globalPrefix: process.env.GLOBAL_PREFIX || 'api',
   port: parseInt(process.env.PORT || '3000', 10),
   staticAssets: {
     rootPath: process.env.STATIC_ASSETS_PATH || 'public',
