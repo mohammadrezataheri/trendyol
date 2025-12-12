@@ -1,11 +1,11 @@
 import {
   DashboardOutlined,
-  UserOutlined,
-  ShoppingOutlined,
-  SettingOutlined,
+  TeamOutlined,
+  ShoppingCartOutlined,
   InstagramOutlined,
+  ApiOutlined,
 } from '@ant-design/icons';
-import type { ReactNode } from 'react';
+import type { ComponentType } from 'react';
 
 export const resources = [
   {
@@ -13,7 +13,7 @@ export const resources = [
     list: '/dashboard',
     meta: {
       label: 'داشبورد',
-      icon: DashboardOutlined as unknown as ReactNode,
+      icon: DashboardOutlined as ComponentType<any>,
     },
   },
   {
@@ -21,7 +21,7 @@ export const resources = [
     list: '/users',
     meta: {
       label: 'کاربران',
-      icon: UserOutlined as unknown as ReactNode,
+      icon: TeamOutlined as ComponentType<any>,
     },
   },
   {
@@ -29,7 +29,7 @@ export const resources = [
     list: '/products',
     meta: {
       label: 'محصولات',
-      icon: ShoppingOutlined as unknown as ReactNode,
+      icon: ShoppingCartOutlined as ComponentType<any>,
     },
   },
   {
@@ -37,7 +37,7 @@ export const resources = [
     list: '/instagram-accounts',
     meta: {
       label: 'مدیریت اکانت‌های اینستاگرام',
-      icon: InstagramOutlined as unknown as ReactNode,
+      icon: InstagramOutlined as ComponentType<any>,
     },
   },
   {
@@ -45,7 +45,7 @@ export const resources = [
     list: '/scrape-configs',
     meta: {
       label: 'پیکربندی اسکرپ',
-      icon: SettingOutlined as unknown as ReactNode,
+      icon: ApiOutlined as ComponentType<any>,
     },
   },
 ];

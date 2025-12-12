@@ -1,6 +1,8 @@
 {
   "name": "dashboard",
   "version": "0.0.0",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "@ant-design/icons": "^6.1.0"
+  }
 }
-
