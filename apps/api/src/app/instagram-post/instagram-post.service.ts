@@ -160,6 +160,59 @@ console.log("SearchBaseDto", SearchBaseDto);
         throw new BadRequestException("پاسخ نامعتبر از Composio API - redirect_url یافت نشد");
       }
 
+      // درخواست سوم: دریافت لیست connected accounts
+      const connectedAccountsResponse = await firstValueFrom(
+        this.httpService.get(
+          `${this.composioBaseUrl}/connected_accounts`,
+          {
+            headers: {
+              "x-api-key": this.composioApiKey,
+            },
+          }
+        )
+      );
+
+      const items = connectedAccountsResponse.data?.items || [];
+      
+      // پیدا کردن آیتمی که auth_config.id آن با authConfigId مطابقت دارد
+      const matchedItem = items.find(
+        (item: any) => item.auth_config?.id === authConfigId
+      );
+
+      if (matchedItem) {
+        // ایجاد رکورد در AuthConfig
+        const existingAuthConfig = await this.authConfigRepository.findOne({
+          where: { authConfigId: authConfigId },
+        });
+
+        if (!existingAuthConfig) {
+          await this.authConfigRepository.save({
+            authConfigId: authConfigId,
+            toolkit: matchedItem.toolkit?.slug || "instagram",
+            authScheme: matchedItem.auth_config?.auth_scheme || matchedItem.authScheme || "OAUTH2",
+            clientId: null, // این فیلدها در response نیستند
+            clientSecret: null,
+            scopes: [],
+            redirectUrl: redirectUrl,
+            createdBy: userReq.id,
+          });
+        }
+
+        // ایجاد رکورد در InstagramAccount
+        const connectedAccountId = matchedItem.id;
+        const existingInstagramAccount = await this.instagramAccountRepository.findOne({
+          where: { connectedAccountId: connectedAccountId },
+        });
+
+        if (!existingInstagramAccount) {
+          await this.instagramAccountRepository.save({
+            connectedAccountId: connectedAccountId,
+            username: null, // nullable
+            userId: userReq.id,
+          });
+        }
+      }
+
       return {
         redirect_url: redirectUrl
       };

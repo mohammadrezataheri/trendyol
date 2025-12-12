@@ -15,10 +15,10 @@ export default class AuthConfig extends EntityBase {
   @Column({ type: 'varchar' })
   authScheme: string; // e.g., "oauth2"
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   clientId: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', nullable: true })
   clientSecret: string;
 
   @Column({ type: 'jsonb', nullable: true })

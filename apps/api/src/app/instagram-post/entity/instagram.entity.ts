@@ -10,7 +10,7 @@ export default class InstagramAccount extends EntityBase {
   @Column({ type: 'varchar' })
   connectedAccountId: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   username: string;
 
   @Column({ type: 'varchar' })
