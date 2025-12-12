@@ -86,7 +86,7 @@ export function CustomSider({ Title }: RefineThemedLayoutSiderProps) {
           marginTop: '16px',
           border: 'none',
           background: 'transparent',
-          padding: '0 12px 24px 12px',
+          padding: collapsed ? '0' : '0 12px 24px 12px',
         }}
         theme="light"
         inlineCollapsed={collapsed}
@@ -201,22 +201,68 @@ export function CustomSider({ Title }: RefineThemedLayoutSiderProps) {
         .custom-sider.ant-layout-sider-collapsed .ant-menu-item {
           padding-right: 0 !important;
           padding-left: 0 !important;
-          justify-content: center;
-          padding: 0 20px !important;
-          margin: 8px 0;
+          justify-content: center !important;
+          align-items: center !important;
+          padding: 0 !important;
+          margin: 8px auto;
+          width: 48px;
+          height: 48px;
+          display: flex !important;
         }
         
         .custom-sider.ant-layout-sider-collapsed .ant-menu-item-icon {
-          margin-left: 0;
-          margin-right: 0;
+          margin-left: 0 !important;
+          margin-right: 0 !important;
+          font-size: 24px !important;
+          width: 24px !important;
+          height: 24px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          flex-shrink: 0;
         }
         
         .custom-sider.ant-layout-sider-collapsed .ant-menu-title-content {
-          display: none;
+          display: none !important;
+          width: 0 !important;
+          overflow: hidden !important;
+        }
+        
+        .custom-sider.ant-layout-sider-collapsed .ant-menu-item span {
+          display: none !important;
+          width: 0 !important;
+          overflow: hidden !important;
+        }
+        
+        .custom-sider.ant-layout-sider-collapsed .ant-menu-item > *:not(.ant-menu-item-icon) {
+          display: none !important;
         }
         
         .custom-sider.ant-layout-sider-collapsed .ant-menu-item:hover {
+          transform: scale(1.1);
+          transform-origin: center;
+        }
+        
+        .custom-sider.ant-layout-sider-collapsed .ant-menu-item-selected {
           transform: scale(1.05);
+          transform-origin: center;
+        }
+        
+        .custom-sider.ant-layout-sider-collapsed .ant-menu-item-selected .ant-menu-item-icon {
+          display: flex !important;
+        }
+        
+        /* Ensure icons are always visible in collapsed state */
+        .custom-sider.ant-layout-sider-collapsed .ant-menu-item .ant-menu-item-icon {
+          opacity: 1 !important;
+          visibility: visible !important;
+          display: flex !important;
+        }
+        
+        .custom-sider.ant-layout-sider-collapsed .ant-menu-item-icon svg {
+          display: block !important;
+          width: 100% !important;
+          height: 100% !important;
         }
         
         .custom-sider .ant-menu-item-active {
