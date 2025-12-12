@@ -3,7 +3,7 @@
 import { List, useTable } from '@refinedev/antd';
 import { Table, Space, Button, Tag, Avatar } from 'antd';
 import { EditOutlined, DeleteOutlined, UserOutlined } from '@ant-design/icons';
-import { formatPersianNumber } from '../utils/persian-number';
+import { formatPersianNumber } from '../../utils/persian-number';
 
 export default function UsersPage() {
   const { tableProps } = useTable({

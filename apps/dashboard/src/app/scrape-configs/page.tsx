@@ -3,7 +3,7 @@
 import { List, useTable } from '@refinedev/antd';
 import { Table, Space, Button, Tag } from 'antd';
 import { EditOutlined, DeleteOutlined, LinkOutlined } from '@ant-design/icons';
-import { formatPersianNumber } from '../utils/persian-number';
+import { formatPersianNumber } from '../../utils/persian-number';
 
 export default function ScrapeConfigsPage() {
   const { tableProps } = useTable({

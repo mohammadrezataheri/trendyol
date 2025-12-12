@@ -68,7 +68,6 @@ export default function Login() {
           </ConfigProvider>
         </App>
       }
-      redirectOnSuccess="/dashboard"
     >
       <RedirectToDashboard />
     </Authenticated>

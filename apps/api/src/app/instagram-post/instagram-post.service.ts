@@ -182,7 +182,7 @@ export class InstagramPostService {
             auth_config_id: authConfigId,
             user_id: userReq.id
           },
-          {
+          { 
             headers: {
               "x-api-key": this.composioApiKey,
               "Content-Type": "application/json",
@@ -209,7 +209,7 @@ export class InstagramPostService {
           {
             headers: {
               "x-api-key": this.composioApiKey,
-            },
+            }, 
           }
         )
       );

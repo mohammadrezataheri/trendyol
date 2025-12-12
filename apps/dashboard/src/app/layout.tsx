@@ -30,7 +30,7 @@ export default function RootLayout({
                   colorBgContainer: '#ffffff',
                   colorBgElevated: '#ffffff',
                   colorBorder: '#e8e8e8',
-                  colorText: '#262626',
+                  colorText: '#262626', 
                   colorTextSecondary: '#8c8c8c',
                 },
                 components: {

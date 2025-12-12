@@ -9,12 +9,12 @@ import { resources } from '../config/resources';
 
 const { Sider: AntdSider } = Layout;
 
-export function CustomSider({ Title, collapsed: initialCollapsed }: RefineThemedLayoutSiderProps) {
+export function CustomSider({ Title }: RefineThemedLayoutSiderProps) {
   const { menuItems, selectedKey } = useMenu();
   const { token } = theme.useToken();
   const router = useRouter();
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(initialCollapsed || false);
+  const [collapsed, setCollapsed] = useState(false);
 
   // Fallback to resources if menuItems is empty
   const items = React.useMemo(() => {
@@ -26,9 +26,7 @@ export function CustomSider({ Title, collapsed: initialCollapsed }: RefineThemed
         label: resource.meta?.label || resource.name,
         icon:
           Icon && typeof Icon === 'function'
-            ? React.createElement(Icon as React.ComponentType, {
-                style: { fontSize: '18px' },
-              })
+            ? React.createElement(Icon as React.ComponentType<any>)
             : null,
         onClick: () => {
           if (resource.list) {

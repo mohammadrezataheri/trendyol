@@ -14,30 +14,34 @@ import { PersianStatistic } from '../../components/persian-statistic';
 const { Title } = Typography;
 
 export default function DashboardPage() {
-  const { data: usersData, isLoading: usersLoading } = useList({
+  const { result: usersResult, query: usersQuery } = useList({
     resource: 'users',
     pagination: {
       pageSize: 1,
     },
   });
 
-  const { data: productsData, isLoading: productsLoading } = useList({
+  const { result: productsResult, query: productsQuery } = useList({
     resource: 'trendyol/products',
     pagination: {
       pageSize: 1,
     },
   });
 
-  const { data: instagramAccountsData, isLoading: instagramLoading } = useList({
+  const { result: instagramAccountsResult, query: instagramQuery } = useList({
     resource: 'instagram-post/account',
     pagination: {
       pageSize: 1,
-    },
+    }, 
   });
 
-  const usersCount = usersData?.total || 0;
-  const productsCount = productsData?.total || 0;
-  const instagramCount = instagramAccountsData?.total || 0;
+  const usersCount = usersResult?.total || 0;
+  const productsCount = productsResult?.total || 0;
+  const instagramCount = instagramAccountsResult?.total || 0;
+
+  const usersLoading = usersQuery.isLoading;
+  const productsLoading = productsQuery.isLoading;
+  const instagramLoading = instagramQuery.isLoading;
 
   if (usersLoading || productsLoading || instagramLoading) {
     return (

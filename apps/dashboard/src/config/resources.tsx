@@ -5,6 +5,7 @@ import {
   SettingOutlined,
   InstagramOutlined,
 } from '@ant-design/icons';
+import type { ReactNode } from 'react';
 
 export const resources = [
   {
@@ -12,7 +13,7 @@ export const resources = [
     list: '/dashboard',
     meta: {
       label: 'داشبورد',
-      icon: DashboardOutlined,
+      icon: DashboardOutlined as unknown as ReactNode,
     },
   },
   {
@@ -20,7 +21,7 @@ export const resources = [
     list: '/users',
     meta: {
       label: 'کاربران',
-      icon: UserOutlined,
+      icon: UserOutlined as unknown as ReactNode,
     },
   },
   {
@@ -28,15 +29,15 @@ export const resources = [
     list: '/products',
     meta: {
       label: 'محصولات',
-      icon: ShoppingOutlined,
+      icon: ShoppingOutlined as unknown as ReactNode,
     },
   },
   {
     name: 'instagram-accounts',
     list: '/instagram-accounts',
     meta: {
-      label: 'اکانت‌های اینستاگرام',
-      icon: InstagramOutlined,
+      label: 'مدیریت اکانت‌های اینستاگرام',
+      icon: InstagramOutlined as unknown as ReactNode,
     },
   },
   {
@@ -44,7 +45,7 @@ export const resources = [
     list: '/scrape-configs',
     meta: {
       label: 'پیکربندی اسکرپ',
-      icon: SettingOutlined,
+      icon: SettingOutlined as unknown as ReactNode,
     },
   },
 ];
