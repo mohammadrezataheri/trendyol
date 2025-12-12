@@ -2,6 +2,7 @@ import { InstagramPostService } from './instagram-post.service';
 import { Get, Post, Query, Body, Controller, UseGuards } from '@nestjs/common';
 import CreateAuthConfigDto from './dto/create-auth-config.dto';
 import InitiateLoginDto from './dto/initiate-login.dto';
+import SyncAccountDto from './dto/sync-account.dto';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ApiController } from 'src/shared/decorators/api-controller.decorator';
@@ -35,10 +36,17 @@ export class AdminInstagramPostController {
   }
 
   @RequireRoles(RoleName.ADMIN)
-  @ApiOperation({ summary: 'لیست پیکربندی‌های احراز هویت' })
-  @Get('auth-config/list')
-  getAuthConfigs(@GetUser() user: IGetUser,SearchBaseDto: SearchBaseDto) {
-    return this.InstagramPostService.getAuthConfigs(user, SearchBaseDto);
+  @ApiOperation({
+    summary: 'همگام‌سازی اطلاعات اکانت اینستاگرام',
+    description: 'این endpoint اطلاعات اکانت اینستاگرام را از Composio دریافت کرده و در دیتابیس به‌روزرسانی می‌کند',
+  })
+  @Post('account/sync')
+  syncAccount(
+    @GetUser() user: IGetUser,
+    @Body() syncAccountDto: SyncAccountDto
+  ) {
+    return this.InstagramPostService.syncAccount(user, syncAccountDto);
   }
+
 }
  

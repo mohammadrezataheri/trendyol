@@ -24,7 +24,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <CustomSider
               {...props}
               Title={({ collapsed }: { collapsed: boolean }) => (
-                <ThemedTitle collapsed={collapsed} text="Trendyol Scrapper" />
+                <ThemedTitle 
+                  collapsed={collapsed} 
+                  text="ترندیول اسکرپر"
+                  icon={<span style={{ fontSize: '24px' }}>🛍️</span>}
+                />
               )}
             />
           )}

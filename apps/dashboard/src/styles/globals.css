@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
 * {
   box-sizing: border-box;
   padding: 0;
@@ -11,10 +13,369 @@ body {
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  direction: rtl;
+}
+
+/* تبدیل اعداد به فارسی */
+body,
+* {
+  font-variant-numeric: normal;
+}
+
+/* بهبود ظاهر کلی */
+.ant-layout {
+  min-height: 100vh;
+}
+
+.ant-layout-content {
+  padding: 24px;
+  background: #f0f2f5;
+}
+
+/* بهبود کارت‌ها */
+.ant-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.ant-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+/* بهبود دکمه‌ها */
+.ant-btn {
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+/* بهبود input ها */
+.ant-input,
+.ant-select-selector {
+  border-radius: 8px;
+}
+
+/* بهبود جداول */
+.ant-table {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.ant-table-thead > tr > th {
+  background: #fafafa;
+  font-weight: 600;
+}
+
+/* بهبود منو */
+.ant-menu {
+  border-radius: 8px;
+}
+
+.ant-menu-item {
+  border-radius: 8px;
+  margin: 4px 8px;
+}
+
+.ant-menu-item-selected {
+  background: linear-gradient(90deg, rgba(24, 144, 255, 0.1), rgba(24, 144, 255, 0.05));
+}
+
+/* بهبود header */
+.ant-layout-header {
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 0 24px;
+}
+
+/* بهبود sider */
+.ant-layout-sider {
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.06);
+}
+
+.ant-layout-sider .ant-menu {
+  background: transparent;
+}
+
+.ant-layout-sider .ant-menu-item {
+  margin: 4px 0;
+  border-radius: 8px;
+}
+
+.ant-layout-sider .ant-menu-item-selected {
+  background: linear-gradient(90deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15)) !important;
+  color: #667eea !important;
+  font-weight: 600;
+}
+
+.ant-layout-sider .ant-menu-item:hover {
+  background: linear-gradient(90deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)) !important;
+}
+
+/* بهبود loading */
+.ant-spin-nested-loading > div > .ant-spin {
+  max-height: none;
+}
+
+/* بهبود scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* بهبود ظاهر List component از Refine */
+.refine-list-container {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* بهبود ظاهر صفحات */
+.ant-layout-content {
+  min-height: calc(100vh - 64px);
+}
+
+/* بهبود ظاهر تیترها */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Vazirmatn', sans-serif;
+  font-weight: 600;
+}
+
+/* بهبود ظاهر لینک‌ها */
+a {
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: #1890ff;
+}
+
+/* بهبود ظاهر Badge */
+.ant-badge {
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+/* بهبود ظاهر Tooltip */
+.ant-tooltip {
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+/* بهبود ظاهر Modal */
+.ant-modal {
+  border-radius: 12px;
+}
+
+.ant-modal-content {
+  border-radius: 12px;
+}
+
+/* بهبود ظاهر Drawer */
+.ant-drawer-content {
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+/* بهبود ظاهر Dropdown */
+.ant-dropdown {
+  border-radius: 8px;
+}
+
+.ant-dropdown-menu {
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.ant-dropdown-menu-item {
+  border-radius: 6px;
+  margin: 2px 0;
+}
+
+/* بهبود ظاهر Pagination */
+.ant-pagination {
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+.ant-pagination-item {
+  border-radius: 6px;
+}
+
+/* بهبود ظاهر Select */
+.ant-select-dropdown {
+  border-radius: 8px;
+}
+
+.ant-select-item {
+  border-radius: 6px;
+  margin: 2px 0;
+}
+
+/* بهبود ظاهر DatePicker */
+.ant-picker {
+  border-radius: 8px;
+}
+
+/* بهبود ظاهر Form */
+.ant-form-item-label > label {
+  font-weight: 500;
+}
+
+/* بهبود ظاهر Empty */
+.ant-empty {
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+/* بهبود ظاهر Spin */
+.ant-spin-text {
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+/* بهبود ظاهر Message */
+.ant-message {
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+/* بهبود ظاهر Notification */
+.ant-notification {
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+/* بهبود ظاهر Popconfirm */
+.ant-popconfirm {
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+/* بهبود ظاهر Progress */
+.ant-progress-text {
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+/* بهبود ظاهر Rate */
+.ant-rate {
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+/* بهبود ظاهر Switch */
+.ant-switch {
+  border-radius: 12px;
+}
+
+/* بهبود ظاهر Tabs */
+.ant-tabs {
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+.ant-tabs-tab {
+  border-radius: 8px 8px 0 0;
+}
+
+/* بهبود ظاهر Timeline */
+.ant-timeline {
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+/* بهبود ظاهر Transfer */
+.ant-transfer {
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+/* بهبود ظاهر Tree */
+.ant-tree {
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+/* بهبود ظاهر Upload */
+.ant-upload {
+  border-radius: 8px;
+}
+
+/* بهبود ظاهر Steps */
+.ant-steps {
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+/* بهبود ظاهر Breadcrumb */
+.ant-breadcrumb {
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+/* بهبود ظاهر PageHeader */
+.ant-page-header {
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+/* بهبود ظاهر Result */
+.ant-result {
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+/* بهبود ظاهر Skeleton */
+.ant-skeleton {
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+/* بهبود ظاهر Alert */
+.ant-alert {
+  border-radius: 8px;
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+/* بهبود ظاهر Tag */
+.ant-tag {
+  border-radius: 6px;
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+/* بهبود ظاهر Typography */
+.ant-typography {
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+/* بهبود ظاهر Descriptions */
+.ant-descriptions {
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+/* بهبود ظاهر Collapse */
+.ant-collapse {
+  border-radius: 8px;
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+.ant-collapse-item {
+  border-radius: 8px;
+}
+
+/* بهبود ظاهر Anchor */
+.ant-anchor {
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+/* بهبود ظاهر BackTop */
+.ant-back-top {
+  border-radius: 8px;
+}
+
+/* بهبود ظاهر Affix */
+.ant-affix {
+  font-family: 'Vazirmatn', sans-serif;
 }
 

@@ -3,6 +3,7 @@ import {
   UserOutlined,
   ShoppingOutlined,
   SettingOutlined,
+  InstagramOutlined,
 } from '@ant-design/icons';
 
 export const resources = [
@@ -28,6 +29,14 @@ export const resources = [
     meta: {
       label: 'محصولات',
       icon: ShoppingOutlined,
+    },
+  },
+  {
+    name: 'instagram-accounts',
+    list: '/instagram-accounts',
+    meta: {
+      label: 'اکانت‌های اینستاگرام',
+      icon: InstagramOutlined,
     },
   },
   {

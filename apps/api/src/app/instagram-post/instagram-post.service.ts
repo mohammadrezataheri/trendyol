@@ -6,6 +6,7 @@ import InstagramAccount from "./entity/instagram.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 import CreateAuthConfigDto from "./dto/create-auth-config.dto";
 import InitiateLoginDto from "./dto/initiate-login.dto";
+import SyncAccountDto from "./dto/sync-account.dto";
 import AuthConfig from "./entity/auth-config.entity";
 import { firstValueFrom } from "rxjs";
 import { RoleName } from "../auth/entity/role.entity";
@@ -62,7 +63,16 @@ export class InstagramPostService {
         'account.username',
         'account.userId',
         'account.authConfigId',
-        'account.createdAt',
+        'account.instagramId',
+        'account.accountType',
+        'account.biography',
+        'account.followersCount',
+        'account.followsCount',
+        'account.mediaCount',
+        'account.profilePictureUrl',
+        'account.website',
+        'account.status',
+        'account.createdAt', 
         'account.updatedAt',
         'authConfig.id',
         'authConfig.authConfigId',
@@ -90,6 +100,15 @@ export class InstagramPostService {
       connectedAccountId: account.account_connectedAccountId,
       username: account.account_username,
       userId: account.account_userId,
+      instagramId: account.account_instagramId,
+      accountType: account.account_accountType,
+      biography: account.account_biography,
+      followersCount: account.account_followersCount,
+      followsCount: account.account_followsCount,
+      mediaCount: account.account_mediaCount,
+      profilePictureUrl: account.account_profilePictureUrl,
+      website: account.account_website,
+      status: account.account_status,
       createdAt: account.account_createdAt,
       updatedAt: account.account_updatedAt,
       // اطلاعات AuthConfig مرتبط
@@ -117,44 +136,6 @@ export class InstagramPostService {
     };
   }
 
- 
-  /**
-   * Get list of auth configs
-   */
-    async getAuthConfigs(userReq: IGetUser, searchBaseDto: SearchBaseDto) {
-    // بررسی می‌کنیم که آیا کاربر نقش ADMIN دارد یا نه
-    const isAdmin = userReq?.email === process.env.ADMIN_EMAIL;
-
-    if (!isAdmin) {
-      throw new NotAcceptableException("شما سطح دسترسی به این بخش را ندارید");
-    }
-
-    const skip = searchBaseDto.skip || 0;
-    const take = searchBaseDto.take || 10;
-
-    const [authConfigs, total] = await this.authConfigRepository.findAndCount({
-      skip,
-      take,
-      order: {
-        createdBy: "DESC",
-      },
-    });
-
-    return {
-      data: authConfigs.map((config) => ({
-        id: config.id,
-        authConfigId: config.authConfigId,
-        toolkit: config.toolkit,
-        authScheme: config.authScheme,
-        scopes: config.scopes,
-        redirectUrl: config.redirectUrl,
-        createdBy: config.createdBy,
-      })),
-      total,
-      skip,
-      take,
-    };
-  }
 
   /**
    * Initiate Instagram login flow via Composio
@@ -211,15 +192,20 @@ export class InstagramPostService {
       );
 
       const redirectUrl = linkResponse.data?.redirect_url;
+      const connectedAccountId = linkResponse.data?.connected_account_id;
 
       if (!redirectUrl) {
         throw new BadRequestException("پاسخ نامعتبر از Composio API - redirect_url یافت نشد");
       }
 
-      // درخواست سوم: دریافت لیست connected accounts
-      const connectedAccountsResponse = await firstValueFrom(
+      if (!connectedAccountId) {
+        throw new BadRequestException("پاسخ نامعتبر از Composio API - connected_account_id یافت نشد");
+      }
+
+      // درخواست سوم: دریافت اطلاعات connected account با استفاده از connected_account_id
+      const connectedAccountResponse = await firstValueFrom(
         this.httpService.get(
-          `${this.composioBaseUrl}/connected_accounts`,
+          `${this.composioBaseUrl}/connected_accounts/${connectedAccountId}`,
           {
             headers: {
               "x-api-key": this.composioApiKey,
@@ -228,14 +214,9 @@ export class InstagramPostService {
         )
       );
 
-      const items = connectedAccountsResponse.data?.items || [];
-      
-      // پیدا کردن آیتمی که auth_config.id آن با authConfigId مطابقت دارد
-      const matchedItem = items.find(
-        (item: any) => item.auth_config?.id === authConfigId
-      );
+      const connectedAccountData = connectedAccountResponse.data;
 
-      if (matchedItem) {
+      if (connectedAccountData) {
         // ایجاد رکورد در AuthConfig
         const existingAuthConfig = await this.authConfigRepository.findOne({
           where: { authConfigId: authConfigId },
@@ -244,8 +225,8 @@ export class InstagramPostService {
         if (!existingAuthConfig) {
           await this.authConfigRepository.save({
             authConfigId: authConfigId,
-            toolkit: matchedItem.toolkit?.slug || "instagram",
-            authScheme: matchedItem.auth_config?.auth_scheme || matchedItem.authScheme || "OAUTH2",
+            toolkit: connectedAccountData.toolkit?.slug || "instagram",
+            authScheme: connectedAccountData.auth_config?.auth_scheme || "OAUTH2",
             clientId: null, // این فیلدها در response نیستند
             clientSecret: null,
             scopes: [],
@@ -255,7 +236,6 @@ export class InstagramPostService {
         }
 
         // ایجاد رکورد در InstagramAccount
-        const connectedAccountId = matchedItem.id;
         const existingInstagramAccount = await this.instagramAccountRepository.findOne({
           where: { connectedAccountId: connectedAccountId },
         });
@@ -266,9 +246,13 @@ export class InstagramPostService {
             where: { authConfigId: authConfigId },
           });
 
+          // استخراج username از data اگر موجود باشد
+          // می‌توانیم از test_request_endpoint استفاده کنیم یا از data.username
+          const username = connectedAccountData.data?.username || null;
+
           await this.instagramAccountRepository.save({
             connectedAccountId: connectedAccountId,
-            username: null, // nullable
+            username: username,
             userId: userReq.id,
             authConfig: authConfigToUse, // تنظیم رابطه با authConfig
           });
@@ -284,6 +268,144 @@ export class InstagramPostService {
         error?.response?.data?.message || 
         error?.message || 
         "خطا در ایجاد لینک لاگین اینستاگرام"
+      );
+    }
+  }
+
+  /**
+   * Sync Instagram account information from Composio
+   * این متد اطلاعات اکانت اینستاگرام را از Composio دریافت کرده و در دیتابیس به‌روزرسانی می‌کند
+   */
+  async syncAccount(userReq: IGetUser, syncAccountDto: SyncAccountDto) {
+    // بررسی می‌کنیم که آیا کاربر نقش ADMIN دارد یا نه
+    const isAdmin = userReq?.email === process.env.ADMIN_EMAIL;
+
+    if (!isAdmin) {
+      throw new NotAcceptableException("شما سطح دسترسی به این بخش را ندارید");
+    }
+
+    const { connectedAccountId } = syncAccountDto;
+
+    try {
+      // درخواست اول: دریافت اطلاعات connected account از Composio
+      const connectedAccountResponse = await firstValueFrom(
+        this.httpService.get(
+          `${this.composioBaseUrl}/connected_accounts/${connectedAccountId}`,
+          {
+            headers: {
+              "x-api-key": this.composioApiKey,
+            },
+          }
+        )
+      );
+
+      const connectedAccountData = connectedAccountResponse.data;
+
+      if (!connectedAccountData) {
+        throw new NotFoundException("Connected account یافت نشد");
+      }
+
+      const authConfigId = connectedAccountData.auth_config?.id;
+
+      if (!authConfigId) {
+        throw new BadRequestException("auth_config.id در response یافت نشد");
+      }
+
+      // درخواست دوم: دریافت اطلاعات کاربر اینستاگرام
+      const userInfoResponse = await firstValueFrom(
+        this.httpService.post(
+          `${this.composioBaseUrl}/tools/execute/INSTAGRAM_GET_USER_INFO`,
+          {
+            connected_account_id: connectedAccountId,
+            arguments: {},
+          },
+          {
+            headers: {
+              "x-api-key": this.composioApiKey,
+              "Content-Type": "application/json",
+            },
+          }
+        )
+      );
+
+      const userInfoData = userInfoResponse.data?.data;
+
+      if (!userInfoData) {
+        throw new BadRequestException("اطلاعات کاربر اینستاگرام یافت نشد");
+      }
+
+      // پیدا کردن authConfig
+      const authConfig = await this.authConfigRepository.findOne({
+        where: { authConfigId: authConfigId },
+      });
+
+      if (!authConfig) {
+        throw new NotFoundException("AuthConfig با این authConfigId یافت نشد");
+      }
+
+      // پیدا کردن یا ایجاد رکورد InstagramAccount
+      let instagramAccount = await this.instagramAccountRepository.findOne({
+        where: { connectedAccountId: connectedAccountId },
+      });
+
+      if (instagramAccount) {
+        // به‌روزرسانی رکورد موجود
+        instagramAccount.username = userInfoData.username || instagramAccount.username;
+        instagramAccount.instagramId = userInfoData.id;
+        instagramAccount.accountType = userInfoData.account_type;
+        instagramAccount.biography = userInfoData.biography;
+        instagramAccount.followersCount = userInfoData.followers_count;
+        instagramAccount.followsCount = userInfoData.follows_count;
+        instagramAccount.mediaCount = userInfoData.media_count;
+        instagramAccount.profilePictureUrl = userInfoData.profile_picture_url;
+        instagramAccount.website = userInfoData.website;
+        instagramAccount.status = connectedAccountData.status;
+        instagramAccount.authConfig = authConfig;
+
+        await this.instagramAccountRepository.save(instagramAccount);
+      } else {
+        // ایجاد رکورد جدید
+        instagramAccount = await this.instagramAccountRepository.save({
+          connectedAccountId: connectedAccountId,
+          username: userInfoData.username,
+          userId: userReq.id,
+          instagramId: userInfoData.id,
+          accountType: userInfoData.account_type,
+          biography: userInfoData.biography,
+          followersCount: userInfoData.followers_count,
+          followsCount: userInfoData.follows_count,
+          mediaCount: userInfoData.media_count,
+          profilePictureUrl: userInfoData.profile_picture_url,
+          website: userInfoData.website,
+          status: connectedAccountData.status,
+          authConfig: authConfig,
+        });
+      }
+
+      return {
+        success: true,
+        message: "اطلاعات اکانت اینستاگرام با موفقیت همگام‌سازی شد",
+        data: {
+          id: instagramAccount.id,
+          connectedAccountId: instagramAccount.connectedAccountId,
+          username: instagramAccount.username,
+          instagramId: instagramAccount.instagramId,
+          accountType: instagramAccount.accountType,
+          biography: instagramAccount.biography,
+          followersCount: instagramAccount.followersCount,
+          followsCount: instagramAccount.followsCount,
+          mediaCount: instagramAccount.mediaCount,
+          profilePictureUrl: instagramAccount.profilePictureUrl,
+          website: instagramAccount.website,
+          status: instagramAccount.status,
+        },
+      };
+    } catch (error) {
+      console.error("Error syncing account:", error?.response?.data || error?.message);
+      throw new BadRequestException(
+        error?.response?.data?.message || 
+        error?.message || 
+        "خطا در همگام‌سازی اطلاعات اکانت اینستاگرام"
       );
     }
   }
