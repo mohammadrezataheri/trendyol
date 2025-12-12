@@ -1,9 +1,10 @@
 'use client';
 
 import { Table, Space, Button, Tag, Avatar, Typography, Tabs, Card, Empty, Spin, Modal, App } from 'antd';
-import { EditOutlined, DeleteOutlined, SyncOutlined, InstagramOutlined, PlusOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { EditOutlined, DeleteOutlined, SyncOutlined, InstagramOutlined, PlusOutlined, InfoCircleOutlined, FileTextOutlined, ShoppingOutlined } from '@ant-design/icons';
 import { formatPersianNumber } from '../../utils/persian-number';
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import axios from 'axios';
 
 const { Text } = Typography;
@@ -90,6 +91,8 @@ interface SyncResponse {
 
 export default function InstagramAccountsPage() {
   const { notification } = App.useApp();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const [accountsData, setAccountsData] = useState<InstagramAccount[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -98,6 +101,10 @@ export default function InstagramAccountsPage() {
   const [syncingAccountId, setSyncingAccountId] = useState<string | null>(null);
   const [isAddAccountModalOpen, setIsAddAccountModalOpen] = useState(false);
   const [isStartingLogin, setIsStartingLogin] = useState(false);
+  const [isAddCronModalOpen, setIsAddCronModalOpen] = useState(false);
+  
+  // Get active tab from URL query parameter, default to 'accounts'
+  const activeTab = searchParams.get('tab') || 'accounts';
   
   const pageSize = 10;
 
@@ -206,6 +213,32 @@ export default function InstagramAccountsPage() {
     setIsAddAccountModalOpen(true);
   };
 
+  const handleAddCron = () => {
+    setIsAddCronModalOpen(true);
+  };
+
+  const handleManualPost = () => {
+    setIsAddCronModalOpen(false);
+    // TODO: Implement manual post functionality
+    notification.info({
+      message: 'در حال توسعه',
+      description: 'قابلیت افزودن پست دستی به زودی اضافه خواهد شد',
+      placement: 'topRight',
+      duration: 3,
+    });
+  };
+
+  const handleSazitoProduct = () => {
+    setIsAddCronModalOpen(false);
+    // TODO: Implement sazito product data functionality
+    notification.info({
+      message: 'در حال توسعه',
+      description: 'قابلیت دریافت داده محصول از سازی‌تو به زودی اضافه خواهد شد',
+      placement: 'topRight',
+      duration: 3,
+    });
+  };
+
   const handleStartLogin = async () => {
     try {
       setIsStartingLogin(true);
@@ -269,7 +302,12 @@ export default function InstagramAccountsPage() {
         styles={{ body: { padding: 0 } }}
       >
         <Tabs
-          defaultActiveKey="accounts"
+          activeKey={activeTab}
+          onChange={(key) => {
+            const params = new URLSearchParams(searchParams.toString());
+            params.set('tab', key);
+            router.push(`?${params.toString()}`, { scroll: false });
+          }}
           type="line"
           size="large"
           style={{
@@ -425,6 +463,16 @@ export default function InstagramAccountsPage() {
               label: 'کرون جاب‌ها',
               children: (
                 <div style={{ padding: '24px 0' }}>
+                  <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'flex-end' }}>
+                    <Button
+                      type="primary"
+                      icon={<PlusOutlined />}
+                      size="large"
+                      onClick={handleAddCron}
+                    >
+                      افزودن کرون جدید
+                    </Button>
+                  </div>
                   <Empty
                     description="هنوز کرون جابی تعریف نشده است"
                     image={Empty.PRESENTED_IMAGE_SIMPLE}
@@ -488,6 +536,69 @@ export default function InstagramAccountsPage() {
               onClick={handleStartLogin}
             >
               می‌دانم و شروع می‌کنم
+            </Button>
+          </div>
+        </div>
+      </Modal>
+      
+      <Modal
+        open={isAddCronModalOpen}
+        onCancel={() => setIsAddCronModalOpen(false)}
+        footer={null}
+        title={
+          <Space>
+            <PlusOutlined style={{ color: '#1890ff' }} />
+            <span>افزودن کرون جدید</span>
+          </Space>
+        }
+        width={500}
+      >
+        <div style={{ padding: '8px 0' }}>
+          <Typography.Paragraph style={{ marginBottom: '24px', fontSize: '14px', lineHeight: '1.8', textAlign: 'center' }}>
+            <Text>لطفاً نوع کرون جاب مورد نظر خود را انتخاب کنید:</Text>
+          </Typography.Paragraph>
+          
+          <Space direction="vertical" size="large" style={{ width: '100%' }}>
+            <Button
+              type="default"
+              icon={<FileTextOutlined />}
+              size="large"
+              block
+              onClick={handleManualPost}
+              style={{
+                height: '60px',
+                fontSize: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '8px',
+              }}
+            >
+              افزودن پست دستی
+            </Button>
+            
+            <Button
+              type="default"
+              icon={<ShoppingOutlined />}
+              size="large"
+              block
+              onClick={handleSazitoProduct}
+              style={{
+                height: '60px',
+                fontSize: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '8px',
+              }}
+            >
+              دریافت داده محصول از سازی‌تو
+            </Button>
+          </Space>
+          
+          <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end' }}>
+            <Button onClick={() => setIsAddCronModalOpen(false)}>
+              انصراف
             </Button>
           </div>
         </div>

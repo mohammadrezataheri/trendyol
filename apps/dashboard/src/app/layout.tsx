@@ -5,6 +5,20 @@ import { RefineProvider } from '../providers/refine-provider';
 import { AppLayout } from '../components/app-layout';
 import '../styles/globals.css';
 
+// Suppress antd React version warning
+if (typeof window !== 'undefined') {
+  const originalWarn = console.warn;
+  console.warn = (...args: any[]) => {
+    if (
+      args[0]?.includes?.('antd v5 support React is 16 ~ 18') ||
+      args[0]?.includes?.('antd: compatible')
+    ) {
+      return;
+    }
+    originalWarn.apply(console, args);
+  };
+}
+
 export default function RootLayout({
   children,
 }: {
