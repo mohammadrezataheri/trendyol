@@ -46,38 +46,65 @@ export class InstagramPostService {
     const take = SearchBaseDto.take || 10;
 
     // دریافت لیست اکانت‌های اینستاگرام از دیتابیس با relation authConfig
-    // استفاده از query builder برای اطمینان از انتخاب صحیح فیلدها
-    const queryBuilder = this.instagramAccountRepository
+    // استفاده از query builder با getRawMany
+    const baseQueryBuilder = this.instagramAccountRepository
       .createQueryBuilder('account')
-      .leftJoinAndSelect('account.authConfig', 'authConfig')
+      .leftJoin('account.authConfig', 'authConfig');
+
+    // گرفتن count قبل از skip/take
+    const total = await baseQueryBuilder.getCount();
+
+    // اضافه کردن select, order, skip, take برای داده‌ها
+    const queryBuilder = baseQueryBuilder
+      .select([
+        'account.id',
+        'account.connectedAccountId',
+        'account.username',
+        'account.userId',
+        'account.authConfigId',
+        'account.createdAt',
+        'account.updatedAt',
+        'authConfig.id',
+        'authConfig.authConfigId',
+        'authConfig.toolkit',
+        'authConfig.authScheme',
+        'authConfig.clientId',
+        'authConfig.scopes',
+        'authConfig.redirectUrl',
+        'authConfig.createdBy',
+        'authConfig.createdAt',
+        'authConfig.updatedAt',
+      ])
       .orderBy('account.id', 'DESC')
       .skip(skip)
       .take(take);
+    
+    // گرفتن داده‌ها با getRawMany
+    const accounts = await queryBuilder.getRawMany();
 
-    const [accounts, total] = await queryBuilder.getManyAndCount();
-
-    // تبدیل داده‌ها به فرمت مناسب برای نمایش
+    // تبدیل داده‌های raw به فرمت مناسب برای نمایش
+    // getRawMany داده‌ها را با prefix alias برمی‌گرداند (مثلاً account_id, authConfig_id)
     const formattedData = accounts.map((account) => ({
       // اطلاعات InstagramAccount
-      id: account.id,
-      connectedAccountId: account.connectedAccountId,
-      username: account.username,
-      userId: account.userId,
-      createdAt: account.createdAt,
-      updatedAt: account.updatedAt,
+      id: account.account_id,
+      connectedAccountId: account.account_connectedAccountId,
+      username: account.account_username,
+      userId: account.account_userId,
+      createdAt: account.account_createdAt,
+      updatedAt: account.account_updatedAt,
       // اطلاعات AuthConfig مرتبط
-      authConfig: account.authConfig
+      authConfig: account.authConfig_id
         ? {
-            id: account.authConfig.id,
-            authConfigId: account.authConfig.authConfigId,
-            toolkit: account.authConfig.toolkit,
-            authScheme: account.authConfig.authScheme,
-            clientId: account.authConfig.clientId,
-            scopes: account.authConfig.scopes,
-            redirectUrl: account.authConfig.redirectUrl,
-            createdBy: account.authConfig.createdBy,
-            createdAt: account.authConfig.createdAt,
-            updatedAt: account.authConfig.updatedAt,
+            id: account.authConfig_id,
+            authConfigId: account.authConfig_authConfigId,
+            toolkit: account.authConfig_toolkit,
+            authScheme: account.authConfig_authScheme,
+            clientId: account.authConfig_clientId,
+            scopes: account.authConfig_scopes,
+            redirectUrl: account.authConfig_redirectUrl,
+            createdBy: account.authConfig_createdBy,
+            createdAt: account.authConfig_createdAt,
+            updatedAt: account.authConfig_updatedAt,
           }
         : null,
     }));
